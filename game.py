@@ -14,8 +14,8 @@ SCR = WDTH * TNUM # ウィンドウの大きさ
 pygame.init()
 screen = pygame.display.set_mode( (SCR, SCR) )
 
-koma = [[0 for x in range(TNUM)] for x in range(TNUM)]
-can_put = [[0 for x in range(TNUM)] for x in range(TNUM)]
+koma = [[0 for k in range(TNUM)] for k in range(TNUM)]
+can_put = [[0 for k in range(TNUM)] for k in range(TNUM)]
 
 line = [1, -1, 0, 0, 1, 1, -1, -1]
 row = [0, 0, 1, -1, 1, -1, 1, -1]
@@ -30,19 +30,21 @@ def check(l, r, x, y, color):
   if koma[x][y] == BLANK: return False
   while 1:
     if x < 0 or x >= TNUM or y < 0 or y >= TNUM: return False
-    if koma[x][y] == color: return True
+    if koma[x][y] == color: break
     x += l
     y += r
+  return True
 
 # ひっくり返す
 def reverse(l, r, x, y, color):
-  if check(l, r, x, y, color) == False: return
+  if not check(l, r, x, y, color): return
   
   while 1:
     x += l
     y += r
-    if koma[x][y] == color: return
+    if koma[x][y] == color: break
     koma[x][y] = color
+  return True
 
 # 碁盤
 def board():
@@ -81,7 +83,7 @@ def main():
   pygame.display.set_caption('Mini Othello')
 
   pygame.mouse.set_visible(True)
-  color = BLACK    # どちらの順番かを記録しておく変数
+  color = BLACK    # 色を記憶しておく変数
 
   koma[int(TNUM/2)][int(TNUM/2)] = BLACK
   koma[int(TNUM/2)-1][int(TNUM/2)-1] = BLACK
@@ -98,7 +100,7 @@ def main():
 
   while 1:
     for event in pygame.event.get():
-      if (event.type == KEYDOWN and event.key == K_ESCAPE or event.type == QUIT):
+      if (event.type == KEYDOWN and event.key == K_ESCAPE) or event.type == QUIT:
         pygame.quit()
         sys.exit()
       # if event.type == MOUSEBUTTONDOWN:                
@@ -114,7 +116,15 @@ def main():
       # print(can_put[x][y])
 
       # if can_put[x][y] == 1:
-      play(x, y, color)
+      for i in range(8):
+        reverse(line[i], row[i], x, y, color)
+        
+      if color == BLACK: color = WHITE
+      else: color = BLACK
+
+      board()       
+      koma_update(color)
+      print(koma)
       pygame.display.flip()
   
 
